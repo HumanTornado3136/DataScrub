@@ -1,0 +1,46 @@
+import tkinter as tk
+from tkinter import filedialog
+import pandas as pd
+
+def import_files():
+    file1_path = filedialog.askopenfilename(title="Select File 1", filetypes=(("Text files", "*.txt"),))
+    print("File 1 path:", file1_path)
+    
+    file2_path = filedialog.askopenfilename(title="Select File 2", filetypes=(("Excel files", "*.xlsx;*.xls"),))
+    print("File 2 path:", file2_path)
+    
+    return file1_path, file2_path
+
+def perform_find_replace(file1_path, file2_path):
+    # Read the files using pandas
+    df1 = pd.read_csv(file1_path, delimiter="\t", header=None, names=["Text"])  # Assuming file 1 is tab-separated
+    df2 = pd.read_excel(file2_path)  # Assuming file 2 is an Excel file
+
+    # Perform find and replace for each line in file 1
+    changes_count = 0
+    for index1, row1 in df1.iterrows():
+        for index2, row2 in df2.iterrows():
+            keyword = row2['Column A']
+            replacement = row2['Column B']
+            df1.at[index1, 'Text'] = df1.at[index1, 'Text'].replace(keyword, replacement)
+            changes_count += df1.at[index1, 'Text'].count(replacement)
+
+    # Print the updated file 1
+    print("Number of changes:", changes_count)
+    print(df1)
+
+# Create the main window
+window = tk.Tk()
+
+# Create a dropdown menu to select the file origin
+file_origin_var = tk.StringVar(window)
+file_origin_var.set("File Origin")  # Default value
+file_origin_menu = tk.OptionMenu(window, file_origin_var, "Option 1", "Option 2", "Option 3", "Option 4")
+file_origin_menu.pack()
+
+# Create a button to import files and perform find and replace
+import_button = tk.Button(window, text="Import Files", command=lambda: perform_find_replace(file1_path, file2_path))
+import_button.pack()
+
+# Start the main event loop
+window.mainloop()
